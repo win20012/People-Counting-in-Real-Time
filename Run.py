@@ -2,6 +2,7 @@ from mylib.centroidtracker import CentroidTracker
 from mylib.trackableobject import TrackableObject
 from imutils.video import VideoStream
 from imutils.video import FPS
+#from imutils import resize
 from mylib.mailer import Mailer
 from mylib import config, thread
 import time, schedule, csv
@@ -44,8 +45,8 @@ def run():
 	# if a video path was not supplied, grab a reference to the ip camera
 	if not args.get("input", False):
 		print("[INFO] Starting the live stream..")
-		vs = VideoStream(config.url).start()
-		time.sleep(2.0)
+		vs = VideoStream(src=config.url).start()
+		#time.sleep(2.0)
 
 	# otherwise, grab a reference to the video file
 	else:
@@ -87,6 +88,8 @@ def run():
 		# grab the next frame and handle if we are reading from either
 		# VideoCapture or VideoStream
 		frame = vs.read()
+		
+		
 		frame = frame[1] if args.get("input", False) else frame
 
 		# if we are viewing a video and we did not grab a frame then we
@@ -97,12 +100,23 @@ def run():
 		# resize the frame to have a maximum width of 500 pixels (the
 		# less data we have, the faster we can process it), then convert
 		# the frame from BGR to RGB for dlib
-		frame = imutils.resize(frame, width = 500)
+		try:
+			frame = imutils.resize(frame, width = 500)
+		except AttributeError:
+			print(frame)
+			raise AttributeError
+
+
 		rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
 		# if the frame dimensions are empty, set them
-		if W is None or H is None:
-			(H, W) = frame.shape[:2]
+		try:
+
+			if W is None or H is None:
+				(H, W) = frame.shape[:2]
+		except AttributeError:
+			print('(H, W) = frame.shape[:2] error')
+			raise AttributeError
 
 		# if we are supposed to be writing a video to disk, initialize
 		# the writer
@@ -189,7 +203,9 @@ def run():
 		# draw a horizontal line in the center of the frame -- once an
 		# object crosses this line we will determine whether they were
 		# moving 'up' or 'down'
-		cv2.line(frame, (0, H // 2), (W, H // 2), (0, 0, 0), 3)
+		#cv2.line(frame, (0, H // 2), (W, H // 2), (0, 0, 0), 3)
+		cv2.line(frame, (0,220), (W,120), (0, 0, 0), 3)
+		#cv2.line(frame, (0, H // 2), (W, H // 2), (0, 0, 0), 3)
 		cv2.putText(frame, "-Prediction border - Entrance-", (10, H - ((i * 20) + 200)),
 			cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
 

@@ -5,7 +5,7 @@
 # e.g., 'email@gmail.com'
 MAIL = ''
 # Enter the ip camera url (e.g., url = 'http://191.138.0.100:8040/video')
-url = ''
+url = 'https://thbcctv07.thb.gov.tw/T14A-d61a0c91'
 
 # ON/OFF for mail feature. Enter True to turn on the email alert feature.
 ALERT = False
