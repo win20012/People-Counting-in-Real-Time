@@ -1,0 +1,16 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["--prototxt mobilenet_ssd/MobileNetSSD_deploy.prototxt","--model mobilenet_ssd/MobileNetSSD_deploy.caffemodel","--input videos/102_2021_08_30_10AM_54_40.mp4"]
+        }
+    ]
+}

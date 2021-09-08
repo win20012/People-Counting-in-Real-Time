@@ -204,8 +204,8 @@ def run():
 		# object crosses this line we will determine whether they were
 		# moving 'up' or 'down'
 		#cv2.line(frame, (0, H // 2), (W, H // 2), (0, 0, 0), 3)
-		cv2.line(frame, (0,220), (W,120), (0, 0, 0), 3)
-		#cv2.line(frame, (0, H // 2), (W, H // 2), (0, 0, 0), 3)
+		#cv2.line(frame, (0,220), (W,120), (0, 0, 0), 3)
+		cv2.line(frame, (0, H // 2), (W, H // 2), (0, 0, 0), 3)
 		cv2.putText(frame, "-Prediction border - Entrance-", (10, H - ((i * 20) + 200)),
 			cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
 
@@ -231,8 +231,30 @@ def run():
 				# us in which direction the object is moving (negative for
 				# 'up' and positive for 'down')
 				y = [c[1] for c in to.centroids]
-				direction = centroid[1] - np.mean(y)
+				#print(y)
+				#direction = centroid[1] - np.mean(y)
+				direction =  0
 				to.centroids.append(centroid)
+				direction_all=[]
+				if len(y) >= 60:
+					# sum  of xi - mean(xi-1)
+					try:
+						#direction_all=[]
+						for index,i in enumerate(y[-61:]):
+							prev_mean= np.mean(y[:index+1])
+							direc= i - prev_mean
+							direction_all.append(direc)
+						if all([x >= 0 for x in direction_all]):
+							direction = 1
+						elif all([x <= 0 for x in direction_all]):    
+							direction = -1
+						else:
+							direction = 0
+							 
+					except:
+						pass
+				else:
+					pass
 
 				# check to see if the object has been counted or not
 				if not to.counted:
@@ -240,9 +262,11 @@ def run():
 					# is moving up) AND the centroid is above the center
 					# line, count the object
 					if direction < 0 and centroid[1] < H // 2:
+						
 						totalUp += 1
 						empty.append(totalUp)
 						to.counted = True
+						print('ID '+str(to.objectID) + ' going up')
 
 					# if the direction is positive (indicating the object
 					# is moving down) AND the centroid is below the
@@ -261,6 +285,7 @@ def run():
 								print("[INFO] Alert sent")
 
 						to.counted = True
+						print('ID '+str(to.objectID) + ' going down')
 						
 					x = []
 					# compute the sum of total people inside
