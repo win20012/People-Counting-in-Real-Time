@@ -205,7 +205,7 @@ def run():
 		# moving 'up' or 'down'
 		#cv2.line(frame, (0, H // 2), (W, H // 2), (0, 0, 0), 3)
 		#cv2.line(frame, (0,220), (W,120), (0, 0, 0), 3)
-		cv2.line(frame, (0, H // 2), (W, H // 2), (0, 0, 0), 3)
+		cv2.line(frame, (0, int(round(H * 0.66))), (W, int(round(H * 0.66))), (0, 0, 0), 3)
 		cv2.putText(frame, "-Prediction border - Entrance-", (10, H - ((i * 20) + 200)),
 			cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
 
@@ -261,17 +261,18 @@ def run():
 					# if the direction is negative (indicating the object
 					# is moving up) AND the centroid is above the center
 					# line, count the object
-					if direction < 0 and centroid[1] < H // 2:
+					# H is between 0 and 500 the over the value the upper it will be, the higher the value, the lower it will be.
+					if direction < 0 and centroid[1] < int(round(H * 0.66)):
 						
 						totalUp += 1
 						empty.append(totalUp)
 						to.counted = True
-						print('ID '+str(to.objectID) + ' going up')
+						print('ID '+ str(to.objectID) + ' going up')
 
 					# if the direction is positive (indicating the object
 					# is moving down) AND the centroid is below the
 					# center line, count the object
-					elif direction > 0 and centroid[1] > H // 2:
+					elif direction > 0 and centroid[1] > int(round(H * 0.66)):
 						totalDown += 1
 						empty1.append(totalDown)
 						#print(empty1[-1])
@@ -285,7 +286,7 @@ def run():
 								print("[INFO] Alert sent")
 
 						to.counted = True
-						print('ID '+str(to.objectID) + ' going down')
+						print('ID '+ str(to.objectID) + ' going down')
 						
 					x = []
 					# compute the sum of total people inside
