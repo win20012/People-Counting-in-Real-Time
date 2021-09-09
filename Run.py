@@ -10,6 +10,7 @@ import numpy as np
 import argparse, imutils
 import time, dlib, cv2, datetime
 from itertools import zip_longest
+from Lineiterator import createLineIterator
 
 t0 = time.time()
 
@@ -48,6 +49,8 @@ def run():
 		vs = VideoStream(src=config.url).start()
 		#time.sleep(2.0)
 
+
+
 	# otherwise, grab a reference to the video file
 	else:
 		print("[INFO] Starting the video..")
@@ -60,6 +63,9 @@ def run():
 	# the first frame from the video)
 	W = None
 	H = None
+	hi=500
+	wi=500
+	iterlist=createLineIterator(np.array([0, round(hi * 0.50)]),np.array([wi, round(hi * 0.66)]))
 
 	# instantiate our centroid tracker, then initialize a list to store
 	# each of our dlib correlation trackers, followed by a dictionary to
@@ -205,7 +211,9 @@ def run():
 		# moving 'up' or 'down'
 		#cv2.line(frame, (0, H // 2), (W, H // 2), (0, 0, 0), 3)
 		#cv2.line(frame, (0,220), (W,120), (0, 0, 0), 3)
-		cv2.line(frame, (0, int(round(H * 0.66))), (W, int(round(H * 0.66))), (0, 0, 0), 3)
+		cv2.line(frame, (0, int(round(H * 0.50))), (W, int(round(H * 0.66))), (0, 0, 0), 3)
+		#iterlist=createLineIterator(np.array([0, round(H * 0.50)]),np.array([W, round(H * 0.66)]),frame)
+		#print(len(iterlist))
 		cv2.putText(frame, "-Prediction border - Entrance-", (10, H - ((i * 20) + 200)),
 			cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
 
@@ -235,6 +243,7 @@ def run():
 				#direction = centroid[1] - np.mean(y)
 				direction =  0
 				to.centroids.append(centroid)
+				#print(to.centroids)
 				direction_all=[]
 				if len(y) >= 60:
 					# sum  of xi - mean(xi-1)
@@ -262,31 +271,41 @@ def run():
 					# is moving up) AND the centroid is above the center
 					# line, count the object
 					# H is between 0 and 500 the over the value the upper it will be, the higher the value, the lower it will be.
-					if direction < 0 and centroid[1] < int(round(H * 0.66)):
+					#if direction < 0 and centroid[1] < int(round(H * 0.66)):
+					if direction < 0:
+						for i in iterlist:
+							if centroid[0] < i[0] and centroid[1] < i[1]:
 						
-						totalUp += 1
-						empty.append(totalUp)
-						to.counted = True
-						print('ID '+ str(to.objectID) + ' going up')
+								totalUp += 1
+								empty.append(totalUp)
+								to.counted = True
+								print('ID '+ str(to.objectID) + ' going up')
+								break
 
 					# if the direction is positive (indicating the object
 					# is moving down) AND the centroid is below the
 					# center line, count the object
-					elif direction > 0 and centroid[1] > int(round(H * 0.66)):
-						totalDown += 1
-						empty1.append(totalDown)
-						#print(empty1[-1])
-						# if the people limit exceeds over threshold, send an email alert
-						if sum(x) >= config.Threshold:
-							cv2.putText(frame, "-ALERT: People limit exceeded-", (10, frame.shape[0] - 80),
-								cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 2)
-							if config.ALERT:
-								print("[INFO] Sending email alert..")
-								Mailer().send(config.MAIL)
-								print("[INFO] Alert sent")
+					#elif direction > 0 and centroid[1] > int(round(H * 0.66)):
+					elif direction > 0:
+						for i in iterlist:
+							if centroid[0] < i[0] and centroid[1] < i[1]:
+								totalDown += 1
+								empty1.append(totalDown)
+								to.counted = True
+								print('ID '+ str(to.objectID) + ' going down')
+								if sum(x) >= config.Threshold:
+									cv2.putText(frame, "-ALERT: People limit exceeded-", (10, frame.shape[0] - 80),
+										cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 2)
+									if config.ALERT:
+										print("[INFO] Sending email alert..")
+										Mailer().send(config.MAIL)
+										print("[INFO] Alert sent")
+								break
+								#print(empty1[-1])
+								# if the people limit exceeds over threshold, send an email alert
+						
 
-						to.counted = True
-						print('ID '+ str(to.objectID) + ' going down')
+						
 						
 					x = []
 					# compute the sum of total people inside
