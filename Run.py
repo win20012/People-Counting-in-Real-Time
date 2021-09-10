@@ -245,11 +245,11 @@ def run():
 				to.centroids.append(centroid)
 				#print(to.centroids)
 				direction_all=[]
-				if len(y) >= 60:
+				if len(y) >= 40:
 					# sum  of xi - mean(xi-1)
 					try:
 						#direction_all=[]
-						for index,i in enumerate(y[-61:]):
+						for index,i in enumerate(y[-41:]):
 							prev_mean= np.mean(y[:index+1])
 							direc= i - prev_mean
 							direction_all.append(direc)
