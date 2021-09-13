@@ -10,7 +10,7 @@ url = 'https://thbcctv07.thb.gov.tw/T14A-d61a0c91'
 # ON/OFF for mail feature. Enter True to turn on the email alert feature.
 ALERT = False
 # Set max. people inside limit. Optimise number below: 10, 50, 100, etc.
-Threshold = 10
+Threshold = 2
 # Threading ON/OFF
 Thread = False
 # Simple log to log the counting data

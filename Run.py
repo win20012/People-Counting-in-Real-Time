@@ -11,6 +11,7 @@ import argparse, imutils
 import time, dlib, cv2, datetime
 from itertools import zip_longest
 from Lineiterator import createLineIterator
+from limitexceed import check_exceed
 
 t0 = time.time()
 
@@ -63,10 +64,39 @@ def run():
 	# the first frame from the video)
 	W = None
 	H = None
-	hi=500
+	############ Win's modification parameters ##################
+	# height and width of frame
+	# start running the video first, it's height and width will be printed in the cmd then type it in here
+	# hi = height and wi = width
+	hi=281
 	wi=500
-	iterlist=createLineIterator(np.array([0, round(hi * 0.50)]),np.array([wi, round(hi * 0.66)]))
-
+	#specify points here the line will be draw from x1,y1 to x2,y2
+	x1=wi  * 0.5
+	y1=0
+	x2=wi * 0.5
+	y2=hi
+	# set vertical_direction to 1 for catagorize people enter by walking down and exit by walking up
+	# set to 0 for catagorize people enter by walking to the right and exit by walking  to the left
+	vertical_direction = 0
+	#Specify enter side 
+	# if vertical_direction = 1 , use "up" for enter up and "down" for enter down
+	# if vertical_direction = 0 , use "left" for enter left side and "right" for enter right side
+	enter_direction = 'right'
+	###################################
+	try:
+		m = ((-1*y2)-y1)/((x2)-x1)
+	except:
+		m = 1000000001
+	print(m)
+	# m = (y2-y1)/(x2-x1)
+	# 0,0 -w // 2, -hi
+	#print(m)
+	iterlist=createLineIterator(np.array([int(round(x1)), int(round(y1))]),np.array([int(round(x2)), int(round(y2))]))
+	#cv2.line(frame, (0, int(round(0))), (W // 2, int(round(H))), (0, 0, 0), 3)
+	#iterlist=createLineIterator(np.array([0, round(hi * 0.8)]),np.array([wi, round(hi * 0.80)]))
+	#iterlist= [(x,hi-y) for (x,y) in iterlist]
+	#print(iterlist)
+	#print(iterlist)
 	# instantiate our centroid tracker, then initialize a list to store
 	# each of our dlib correlation trackers, followed by a dictionary to
 	# map each unique object ID to a TrackableObject
@@ -77,9 +107,10 @@ def run():
 	# initialize the total number of frames processed thus far, along
 	# with the total number of objects that have moved either up or down
 	totalFrames = 0
+	x = []
+	#if enter_direction == 'down':
 	totalDown = 0
 	totalUp = 0
-	x = []
 	empty=[]
 	empty1=[]
 
@@ -120,6 +151,7 @@ def run():
 
 			if W is None or H is None:
 				(H, W) = frame.shape[:2]
+				print(f"Frame height  is : {H}, frame width is : {W}")
 		except AttributeError:
 			print('(H, W) = frame.shape[:2] error')
 			raise AttributeError
@@ -211,7 +243,9 @@ def run():
 		# moving 'up' or 'down'
 		#cv2.line(frame, (0, H // 2), (W, H // 2), (0, 0, 0), 3)
 		#cv2.line(frame, (0,220), (W,120), (0, 0, 0), 3)
-		cv2.line(frame, (0, int(round(H * 0.50))), (W, int(round(H * 0.66))), (0, 0, 0), 3)
+		#cv2.line(frame, (0, int(round(H * 0.50))), (W, int(round(H * 0.66))), (0, 0, 0), 3)
+		#cv2.line(frame, (0, int(round(H * 0.80))), (W, int(round(H * 0.80))), (0, 0, 0), 3)
+		cv2.line(frame, (int(round(x1)), int(round(y1))), (int(round(x2)), int(round(y2))), (0, 0, 0), 3)
 		#iterlist=createLineIterator(np.array([0, round(H * 0.50)]),np.array([W, round(H * 0.66)]),frame)
 		#print(len(iterlist))
 		cv2.putText(frame, "-Prediction border - Entrance-", (10, H - ((i * 20) + 200)),
@@ -238,78 +272,234 @@ def run():
 				# centroid and the mean of *previous* centroids will tell
 				# us in which direction the object is moving (negative for
 				# 'up' and positive for 'down')
-				y = [c[1] for c in to.centroids]
-				#print(y)
-				#direction = centroid[1] - np.mean(y)
-				direction =  0
-				to.centroids.append(centroid)
-				#print(to.centroids)
-				direction_all=[]
-				if len(y) >= 40:
-					# sum  of xi - mean(xi-1)
-					try:
-						#direction_all=[]
+				if vertical_direction == 1:
+					y = [c[1] for c in to.centroids]
+					#print(y)
+					#direction = centroid[1] - np.mean(y)
+					direction =  0
+					to.centroids.append(centroid)
+					#print(to.centroids)
+					direction_all=[]
+					if len(y) >= 40:
+						# sum  of xi - mean(xi-1)
+						#try
+							#direction_all=[]
 						for index,i in enumerate(y[-41:]):
 							prev_mean= np.mean(y[:index+1])
 							direc= i - prev_mean
 							direction_all.append(direc)
-						if all([x >= 0 for x in direction_all]):
+						if all([x > 0 for x in direction_all]):
 							direction = 1
-						elif all([x <= 0 for x in direction_all]):    
+						elif all([x < 0 for x in direction_all]):    
 							direction = -1
 						else:
 							direction = 0
-							 
-					except:
-						pass
+						#except
 				else:
-					pass
+					y = [c[0] for c in to.centroids]
+					#print(y)
+					#direction = centroid[1] - np.mean(y)
+					direction =  0
+					to.centroids.append(centroid)
+					#print(to.centroids)
+					direction_all=[]
+					if len(y) >= 40:
+						# sum  of xi - mean(xi-1)
+						#try
+							#direction_all=[]
+						for index,i in enumerate(y[-41:]):
+							prev_mean= np.mean(y[:index+1])
+							direc= i - prev_mean
+							direction_all.append(direc)
+						if all([x > 0 for x in direction_all]):
+							# right
+							direction = 1
+						elif all([x < 0 for x in direction_all]):
+							#left    
+							direction = -1
+						else:
+							direction = 0
 
 				# check to see if the object has been counted or not
 				if not to.counted:
-					# if the direction is negative (indicating the object
-					# is moving up) AND the centroid is above the center
-					# line, count the object
-					# H is between 0 and 500 the over the value the upper it will be, the higher the value, the lower it will be.
-					#if direction < 0 and centroid[1] < int(round(H * 0.66)):
-					if direction < 0:
-						for i in iterlist:
-							if centroid[0] < i[0] and centroid[1] < i[1]:
-						
-								totalUp += 1
-								empty.append(totalUp)
-								to.counted = True
-								print('ID '+ str(to.objectID) + ' going up')
-								break
+					if m < 0 and vertical_direction == 1:
+						# if the direction is negative (indicating the object
+						# is moving up) AND the centroid is above the center
+						# line, count the object
+						# H is between 0 and 500 the over the value the upper it will be, the higher the value, the lower it will be.
+						#if direction < 0 and centroid[1] < int(round(H * 0.66)):
+						#print(str(centroid))
+						if direction < 0:
+							for i in iterlist:
+								if centroid[0] > i[0] and centroid[1] < i[1]:
+							
+									totalUp += 1
+									empty.append(totalUp)
+									to.counted = True
+									print('ID '+ str(to.objectID) + ' going up' + ' direction : ' + str(direction) + ' centroid : ' + str(centroid) + ' pixcel compared to : ' + str(i[0]) + ' ' + str(i[1]))
+									if enter_direction == 'up':
+										check_exceed(x,frame)
+									break
 
-					# if the direction is positive (indicating the object
-					# is moving down) AND the centroid is below the
-					# center line, count the object
-					#elif direction > 0 and centroid[1] > int(round(H * 0.66)):
-					elif direction > 0:
-						for i in iterlist:
-							if centroid[0] < i[0] and centroid[1] < i[1]:
-								totalDown += 1
-								empty1.append(totalDown)
-								to.counted = True
-								print('ID '+ str(to.objectID) + ' going down')
-								if sum(x) >= config.Threshold:
-									cv2.putText(frame, "-ALERT: People limit exceeded-", (10, frame.shape[0] - 80),
-										cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 2)
-									if config.ALERT:
-										print("[INFO] Sending email alert..")
-										Mailer().send(config.MAIL)
-										print("[INFO] Alert sent")
-								break
-								#print(empty1[-1])
-								# if the people limit exceeds over threshold, send an email alert
+						# if the direction is positive (indicating the object
+						# is moving down) AND the centroid is below the
+						# center line, count the object
+						#elif direction > 0 and centroid[1] > int(round(H * 0.66)):
+						elif direction > 0:
+							for i in iterlist:
+								if centroid[0] < i[0] and centroid[1] > i[1]:
+									totalDown += 1
+									empty1.append(totalDown)
+									to.counted = True
+									print('ID '+ str(to.objectID) + ' going down' + ' direction : ' + str(direction) + ' centroid : ' + str(centroid) + ' pixcel compared to : ' + str(i[0]) + ' ' + str(i[1]))
+									if enter_direction == 'down':
+										check_exceed(x,frame)
+									break
+									#print(empty1[-1])
+									# if the people limit exceeds over threshold, send an email alert
+					elif m == 0 and vertical_direction == 1:
 						
+						if direction < 0:
+							for i in iterlist:
+								if centroid[1] < i[1]:
+							
+									totalUp += 1
+									empty.append(totalUp)
+									to.counted = True
+									print('ID '+ str(to.objectID) + ' going up' + ' direction : ' + str(direction) + ' centroid : ' + str(centroid) + ' pixcel compared to : ' + str(i[0]) + ' ' + str(i[1]))
+									if enter_direction == 'up':
+										check_exceed(x,frame)
+									break
 
 						
+						elif direction > 0:
+							for i in iterlist:
+								if centroid[1] > i[1]:
+									totalDown += 1
+									empty1.append(totalDown)
+									to.counted = True
+									print('ID '+ str(to.objectID) + ' going down' + ' direction : ' + str(direction) + ' centroid : ' + str(centroid) + ' pixcel compared to : ' + str(i[0]) + ' ' + str(i[1]))
+									if enter_direction == 'down':
+										check_exceed(x,frame)
+									break
+									
+					elif 0 < m < 1000000000 and vertical_direction == 1:
 						
+						if direction < 0:
+							for i in iterlist:
+								if centroid[0] < i[0] and centroid[1] < i[1]:
+							
+									totalUp += 1
+									empty.append(totalUp)
+									to.counted = True
+									print('ID '+ str(to.objectID) + ' going up' + ' direction : ' + str(direction) + ' centroid : ' + str(centroid) + ' pixcel compared to : ' + str(i[0]) + ' ' + str(i[1]))
+									if enter_direction == 'up':
+										check_exceed(x,frame)
+									break
+
+						
+						elif direction > 0:
+							for i in iterlist:
+								if centroid[0] > i[0] and centroid[1] > i[1]:
+									totalDown += 1
+									empty1.append(totalDown)
+									to.counted = True
+									print('ID '+ str(to.objectID) + ' going down' + ' direction : ' + str(direction) + ' centroid : ' + str(centroid) + ' pixcel compared to : ' + str(i[0]) + ' ' + str(i[1]))
+									if enter_direction == 'down':
+										check_exceed(x,frame)
+									break
+									
+					elif m < 0 and vertical_direction == 0:
+						
+						# if the direction is negative (indicating the object
+						# is moving LEFT) AND the centroid is on the left side
+						# line, count the object
+					
+						
+						if direction < 0:
+							for i in iterlist:
+								if centroid[0] < i[0] and centroid[1] > i[1]:
+							
+									totalUp += 1
+									empty.append(totalUp)
+									to.counted = True
+									print('ID '+ str(to.objectID) + ' going left' + ' direction : ' + str(direction) + ' centroid : ' + str(centroid) + ' pixcel compared to : ' + str(i[0]) + ' ' + str(i[1]))
+									if enter_direction == 'left':
+										check_exceed(x,frame)
+									break
+
+						# if the direction is positive (indicating the object
+						# is moving RIGHT) AND the centroid is on the the side
+						#  line, count the object
+						elif direction > 0:
+							for i in iterlist:
+								if centroid[0] > i[0] and centroid[1] < i[1]:
+									totalDown += 1
+									empty1.append(totalDown)
+									to.counted = True
+									print('ID '+ str(to.objectID) + ' going right' + ' direction : ' + str(direction) + ' centroid : ' + str(centroid) + ' pixcel compared to : ' + str(i[0]) + ' ' + str(i[1]))
+									if enter_direction == 'right':
+										check_exceed(x,frame)
+									break
+									
+					elif m >= 1000000000 and vertical_direction == 0:
+						# m is infinite/ vertical line
+						if direction < 0:
+							for i in iterlist:
+								if centroid[0] < i[0]:
+							
+									totalUp += 1
+									empty.append(totalUp)
+									to.counted = True
+									print('ID '+ str(to.objectID) + ' going left' + ' direction : ' + str(direction) + ' centroid : ' + str(centroid) + ' pixcel compared to : ' + str(i[0]) + ' ' + str(i[1]))
+									if enter_direction == 'left':
+										check_exceed(x,frame)
+									break
+
+						
+						elif direction > 0:
+							for i in iterlist:
+								if centroid[0] > i[0]:
+									totalDown += 1
+									empty1.append(totalDown)
+									to.counted = True
+									print('ID '+ str(to.objectID) + ' going right' + ' direction : ' + str(direction) + ' centroid : ' + str(centroid) + ' pixcel compared to : ' + str(i[0]) + ' ' + str(i[1]))
+									if enter_direction == 'right':
+										check_exceed(x,frame)
+									break
+									
+					elif 0 < m < 1000000000 and vertical_direction == 0:
+						
+						if direction < 0:
+							for i in iterlist:
+								if centroid[0] < i[0] and centroid[1] < i[1]:
+							
+									totalUp += 1
+									empty.append(totalUp)
+									to.counted = True
+									print('ID '+ str(to.objectID) + ' going left' + ' direction : ' + str(direction) + ' centroid : ' + str(centroid) + ' pixcel compared to : ' + str(i[0]) + ' ' + str(i[1]))
+									if enter_direction == 'left':
+										check_exceed(x,frame)
+									break
+
+						
+						elif direction > 0:
+							for i in iterlist:
+								if centroid[0] > i[0] and centroid[1] > i[1]:
+									totalDown += 1
+									empty1.append(totalDown)
+									to.counted = True
+									print('ID '+ str(to.objectID) + ' going right' + ' direction : ' + str(direction) + ' centroid : ' + str(centroid) + ' pixcel compared to : ' + str(i[0]) + ' ' + str(i[1]))
+									if enter_direction == 'right':
+										check_exceed(x,frame)
+									break
+										
 					x = []
 					# compute the sum of total people inside
-					x.append(len(empty1)-len(empty))
+					if enter_direction == 'down' or enter_direction == 'right':
+						x.append(len(empty1)-len(empty))
+					else:
+						x.append(len(empty)-len(empty1))
 					#print("Total people inside:", x)
 
 
@@ -324,11 +514,18 @@ def run():
 			cv2.circle(frame, (centroid[0], centroid[1]), 4, (255, 255, 255), -1)
 
 		# construct a tuple of information we will be displaying on the
-		info = [
-		("Exit", totalUp),
-		("Enter", totalDown),
-		("Status", status),
-		]
+		if enter_direction == 'down' or enter_direction == 'right':
+			info = [
+			("Exit", totalUp),
+			("Enter", totalDown),
+			("Status", status),
+			]
+		else:
+			info = [
+			("Exit", totalDown),
+			("Enter", totalUp),
+			("Status", status),
+			]
 
 		info2 = [
 		("Total people inside", x),

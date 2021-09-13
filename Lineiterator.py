@@ -14,7 +14,7 @@ def createLineIterator(P1, P2):
    #define local variables for readability
     #imageH = img.shape[0]
     #imageW = img.shape[1]
-    imageH = 500
+    imageH = 281
     imageW = 500
     P1X = P1[0]
     P1Y = P1[1]
