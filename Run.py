@@ -75,8 +75,10 @@ def run():
 	y1=0
 	x2=wi * 0.5
 	y2=hi
-	# set vertical_direction to 1 for catagorize people enter by walking down and exit by walking up
-	# set to 0 for catagorize people enter by walking to the right and exit by walking  to the left
+	# set vertical_direction to 1 for catagorize people in a stright horizon line
+	# set to 0 for catagorize people by stright vertical line
+	# if the line has a negative or positive slope, set to 0 or 1 will do
+	#0 will use movement up/downward for calculations, 1 will use movement left/right for calculations
 	vertical_direction = 0
 	#Specify enter side 
 	# if vertical_direction = 1 , use "up" for enter up and "down" for enter down
