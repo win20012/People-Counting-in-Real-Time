@@ -12,6 +12,7 @@ import time, dlib, cv2, datetime
 from itertools import zip_longest
 from Lineiterator import createLineIterator
 from limitexceed import check_exceed
+from get_requests import send_req
 
 t0 = time.time()
 
@@ -84,6 +85,9 @@ def run():
 	# if vertical_direction = 1 , use "up" for enter up and "down" for enter down
 	# if vertical_direction = 0 , use "left" for enter left side and "right" for enter right side
 	enter_direction = 'right'
+	#time
+	now=datetime.datetime.now()
+	fivemin= now+datetime.timedelta(0,300)
 	###################################
 	try:
 		m = ((-1*y2)-y1)/((x2)-x1)
@@ -170,6 +174,14 @@ def run():
 		# (2) the correlation trackers
 		status = "Waiting"
 		rects = []
+
+		# send requests
+		if datetime.datetime.now() >= fivemin:		
+			enterp=info[1][1]
+			exitp=info[0][1]
+			send_req(enterp,exitp)
+			now = datetime.datetime.now()
+			fivemin = now + datetime.timedelta(0,300)
 
 		# check to see if we should run a more computationally expensive
 		# object detection method to aid our tracker
