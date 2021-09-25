@@ -76,8 +76,8 @@ def run():
 	y1=0
 	x2=wi * 0.5
 	y2=hi
-	# set vertical_direction to 1 for catagorize people in a stright horizon line
-	# set to 0 for catagorize people by stright vertical line
+	# set vertical_direction to 1 for catagorize people in a vertical movement
+	# set to 0 for catagorize people by horizon movement
 	# if the line has a negative or positive slope, set to 0 or 1 will do
 	#0 will use movement up/downward for calculations, 1 will use movement left/right for calculations
 	vertical_direction = 0
@@ -86,8 +86,11 @@ def run():
 	# if vertical_direction = 0 , use "left" for enter left side and "right" for enter right side
 	enter_direction = 'right'
 	#time
-	now=datetime.datetime.now()
-	fivemin= now+datetime.timedelta(0,300)
+	if config.five_mins == True:
+		now=datetime.datetime.now()
+		fivemin= now+datetime.timedelta(0,300)
+	if config.people_change == True:
+		peoplechangelist= []
 	###################################
 	try:
 		m = ((-1*y2)-y1)/((x2)-x1)
@@ -176,12 +179,21 @@ def run():
 		rects = []
 
 		# send requests
-		if datetime.datetime.now() >= fivemin:		
-			enterp=info[1][1]
-			exitp=info[0][1]
-			send_req(enterp,exitp)
-			now = datetime.datetime.now()
-			fivemin = now + datetime.timedelta(0,300)
+		if config.five_mins == True:
+			if datetime.datetime.now() >= fivemin:		
+				enterp=info[1][1]
+				exitp=info[0][1]
+				send_req(enterp,exitp)
+				now = datetime.datetime.now()
+				fivemin = now + datetime.timedelta(0,300)
+		elif config.people_change == True:
+			if len(peoplechangelist) >= 2:
+				if peoplechangelist[-1] != peoplechangelist[-2]:
+					enterp=info[1][1]
+					exitp=info[0][1]
+					send_req(enterp,exitp)
+			if len(peoplechangelist) > 2:
+				del peoplechangelist[:-2]
 
 		# check to see if we should run a more computationally expensive
 		# object detection method to aid our tracker
@@ -259,7 +271,7 @@ def run():
 		#cv2.line(frame, (0,220), (W,120), (0, 0, 0), 3)
 		#cv2.line(frame, (0, int(round(H * 0.50))), (W, int(round(H * 0.66))), (0, 0, 0), 3)
 		#cv2.line(frame, (0, int(round(H * 0.80))), (W, int(round(H * 0.80))), (0, 0, 0), 3)
-		cv2.line(frame, (int(round(x1)), int(round(y1))), (int(round(x2)), int(round(y2))), (0, 0, 0), 3)
+		cv2.line(frame, (int(round(x1)), int(round(y1))), (int(round(x2)), int(round(y2))), (0, 0, 255), 3)
 		#iterlist=createLineIterator(np.array([0, round(H * 0.50)]),np.array([W, round(H * 0.66)]),frame)
 		#print(len(iterlist))
 		cv2.putText(frame, "-Prediction border - Entrance-", (10, H - ((i * 20) + 200)),
@@ -544,6 +556,8 @@ def run():
 		info2 = [
 		("Total people inside", x),
 		]
+		if config.people_change == True:
+			peoplechangelist.append(x[-1])
 
                 # Display the output
 		for (i, (k, v)) in enumerate(info):

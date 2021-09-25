@@ -19,5 +19,8 @@ Log = False
 Scheduler = False
 # Auto stop the software after certain a time/hours
 Timer = False
+#requests config
+five_mins= True
+people_change= True
 #===============================================================================
 #===============================================================================
