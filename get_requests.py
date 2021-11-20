@@ -1,5 +1,5 @@
 import requests
-from mylib.config import five_mins, people_change
+from mylib.config import request_API
 import datetime
   
 # defining the api-endpoint 
@@ -9,7 +9,7 @@ import datetime
 
 #API_ENDPOINT = "http://192.168.13.250:7001/api/createEvent/"
 def send_req(enter,exit):
-        API_ENDPOINT = "http://admin:hdit23059797@192.168.13.250:7001/api/createEvent/"
+        API_ENDPOINT = request_API
         #http://admin:hdit23059797@192.16813.250:7001/api/createEvent
         # your API key here
         #API_KEY = "admin:hdit23059797"

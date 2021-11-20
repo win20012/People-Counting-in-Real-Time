@@ -648,9 +648,9 @@ def run():
 ##learn more about different schedules here: https://pypi.org/project/schedule/
 if config.Scheduler:
 	##Runs for every 1 second
-	#schedule.every(1).seconds.do(run)
+	schedule.every(1).seconds.do(run)
 	##Runs at every day (9:00 am). You can change it.
-	schedule.every().day.at("9:00").do(run)
+	#schedule.every().day.at("9:00").do(run)
 
 	while 1:
 		schedule.run_pending()

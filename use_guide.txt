@@ -1,0 +1,12 @@
+################ first time set up ################################
+install python, cmake and anaconda first
+install packages with "pip install -r reqiurement.txt"
+then dlib by conda install -c conda-forge dlib
+################ instructions #####################################
+most of the adjustable parameters are in config.py in mylib folder
+you can edit it by right click on the file and choose "Edit with IDLE" then choose "Edit with IDLE 3.9" or any type of IDLE
+################ parameters rules #################################
+parameters are numbers , logic or words(strings) depends on the type of the parameters
+For numbers write numbers for example ; 1 , 2 , 3 , 4, 0.5 , 0.7
+for logic write ; True or False (dont forget the first letter is capital)
+for words or strings ; 'this is an example' (need to write ' on the both isde of the text message) 
