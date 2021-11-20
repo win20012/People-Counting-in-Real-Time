@@ -5,6 +5,7 @@ from imutils.video import FPS
 #from imutils import resize
 from mylib.mailer import Mailer
 from mylib import config, thread
+from mylib.config import x1,y1,x2,y2,vertical_direction,enter_direction
 import time, schedule, csv
 import numpy as np
 import argparse, imutils
@@ -13,6 +14,8 @@ from itertools import zip_longest
 from Lineiterator import createLineIterator
 from limitexceed import check_exceed
 from get_requests import send_req
+from os.path import exists
+from excel_data_converter import create_summary, data_converter
 
 t0 = time.time()
 
@@ -65,27 +68,7 @@ def run():
 	# the first frame from the video)
 	W = None
 	H = None
-	############ Win's modification parameters ##################
-	# height and width of frame
-	# start running the video first, it's height and width will be printed in the cmd then type it in here
-	# hi = height and wi = width
-	hi=281
-	wi=500
-	#specify points here the line will be draw from x1,y1 to x2,y2
-	x1=wi  * 0.5
-	y1=0
-	x2=wi * 0.5
-	y2=hi
-	# set vertical_direction to 1 for catagorize people in a vertical movement
-	# set to 0 for catagorize people by horizon movement
-	# if the line has a negative or positive slope, set to 0 or 1 will do
-	#0 will use movement up/downward for calculations, 1 will use movement left/right for calculations
-	vertical_direction = 0
-	#Specify enter side 
-	# if vertical_direction = 1 , use "up" for enter up and "down" for enter down
-	# if vertical_direction = 0 , use "left" for enter left side and "right" for enter right side
-	enter_direction = 'right'
-	#time
+
 	if config.five_mins == True:
 		now=datetime.datetime.now()
 		fivemin= now+datetime.timedelta(0,300)
@@ -109,6 +92,8 @@ def run():
 	# instantiate our centroid tracker, then initialize a list to store
 	# each of our dlib correlation trackers, followed by a dictionary to
 	# map each unique object ID to a TrackableObject
+	################
+
 	ct = CentroidTracker(maxDisappeared=40, maxDistance=50)
 	trackers = []
 	trackableObjects = {}
@@ -177,8 +162,7 @@ def run():
 		# (2) the correlation trackers
 		status = "Waiting"
 		rects = []
-
-		# send requests
+		
 		if config.five_mins == True:
 			if datetime.datetime.now() >= fivemin:		
 				enterp=info[1][1]
@@ -186,11 +170,12 @@ def run():
 				send_req(enterp,exitp)
 				now = datetime.datetime.now()
 				fivemin = now + datetime.timedelta(0,300)
-		elif config.people_change == True:
+		if config.people_change == True:
 			if len(peoplechangelist) >= 2:
 				if peoplechangelist[-1] != peoplechangelist[-2]:
 					enterp=info[1][1]
 					exitp=info[0][1]
+					print(peoplechangelist)
 					send_req(enterp,exitp)
 			if len(peoplechangelist) > 2:
 				del peoplechangelist[:-2]
@@ -348,6 +333,10 @@ def run():
 
 				# check to see if the object has been counted or not
 				if not to.counted:
+					if centroid[0] < iterlist[0][0] or centroid[0] > iterlist[-1][0]:
+						pass
+					elif m == 1000000001 and (centroid[1] < iterlist[0][1] or centroid[1] > iterlist[-1][1]):
+						pass
 					if m < 0 and vertical_direction == 1:
 						# if the direction is negative (indicating the object
 						# is moving up) AND the centroid is above the center
@@ -531,7 +520,8 @@ def run():
 
 			# store the trackable object in our dictionary
 			trackableObjects[objectID] = to
-
+			
+                                #print(peoplechangelist)
 			# draw both the ID of the object and the centroid of the
 			# object on the output frame
 			text = "ID {}".format(objectID)
@@ -557,9 +547,29 @@ def run():
 		("Total people inside", x),
 		]
 		if config.people_change == True:
-			peoplechangelist.append(x[-1])
-
-                # Display the output
+                        #if len(peoplechangelist) > 0:
+			peoplechangelist.append(x)
+		
+		try:
+			assert objectID
+			assert centroid
+			text = "ID {}".format(objectID)
+			cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
+				cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+			cv2.circle(frame, (centroid[0], centroid[1]), 4, (255, 255, 255), -1)
+		except (AssertionError,ValueError,NameError):
+			pass
+		try:
+			if int(info2[0][1][0]) >= config.Threshold:
+				cv2.putText(frame, "-ALERT: People limit exceeded-", (10, frame.shape[0] - 80),
+					cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 2)
+				if config.ALERT:
+					print("[INFO] Sending email alert..")
+					Mailer().send(config.MAIL)
+					print("[INFO] Alert sent")
+		except IndexError:
+			pass	
+		# Display the output
 		for (i, (k, v)) in enumerate(info):
 			text = "{}: {}".format(k, v)
 			cv2.putText(frame, text, (10, H - ((i * 20) + 20)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
@@ -570,14 +580,24 @@ def run():
 
 		# Initiate a simple log to save data at end of the day
 		if config.Log:
-			datetimee = [datetime.datetime.now()]
-			d = [datetimee, empty1, empty, x]
-			export_data = zip_longest(*d, fillvalue = '')
 
-			with open('Log.csv', 'w', newline='') as myfile:
-				wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-				wr.writerow(("End Time", "In", "Out", "Total Inside"))
-				wr.writerows(export_data)
+			try:
+				timeinxmins
+			except NameError:
+				timeinxmins=datetime.datetime.now() + config.timedel
+
+			if datetime.datetime.now() >= timeinxmins:
+				#data={'櫃位地點':config.cam_place,'People Enter':info[1][1],'People Exit':info[0][1],'Current People Inside':info2[0][1],'Date':datetime.datetime.now()}
+				#df=pd.DataFrame(data=data)
+				timeinxmins=datetime.datetime.now() + config.timedel
+				excel_name="./summary/people counting summary.xlsx"
+				if exists(excel_name):
+					#with pd.ExcelWriter(excel_name,mode='a')  as writer:
+					#append_df_to_excel(excel_name, df,header=None, index=False)
+					data_converter(info[1][1],info[0][1])  
+				else:
+					create_summary(info[1][1],info[0][1])
+				print('summary exported!')
 				
 		# check to see if we should write the frame to disk
 		if writer is not None:
