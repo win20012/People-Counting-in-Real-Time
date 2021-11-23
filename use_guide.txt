@@ -9,4 +9,10 @@ you can edit it by right click on the file and choose "Edit with IDLE" then choo
 parameters are numbers , logic or words(strings) depends on the type of the parameters
 For numbers write numbers for example ; 1 , 2 , 3 , 4, 0.5 , 0.7
 for logic write ; True or False (dont forget the first letter is capital)
-for words or strings ; 'this is an example' (need to write ' on the both isde of the text message) 
+for words or strings ; 'this is an example' (need to write ' on the both isde of the text message)
+############### start guide ################################
+1. open cmd and type "cd C:\Users\H310M\Desktop\tracker1\People-Counting-in-Real-Time" for normal tracker 
+or "cd C:\Users\H310M\Desktop\rapid\RAPiD" for fish eye tracker. Note that the directory depends on the location of the tracker folder
+2. type "conda activate rapid"
+3. then type "python run.py --prototxt mobilenet_ssd/MobileNetSSD_deploy.prototxt --model mobilenet_ssd/MobileNetSSD_deploy.caffemodel -cam camera1" for normal tracker, the last argument (-cam) is the summary file name.
+or "python tracker.py -cam camera1" for fish eye tracker, the last argument (-cam) is the summary file name.

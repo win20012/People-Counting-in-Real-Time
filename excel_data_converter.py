@@ -1,9 +1,10 @@
 import pandas as pd
 import datetime
+import argparse
 #from mylib.config import cam_place
 
-def data_converter(enter,exit):
-    df=pd.read_excel("./summary/people counting summary.xlsx")
+def data_converter(enter,exit,excel_name):
+    df=pd.read_excel(excel_name)
     ex_time=[f'{i}:00:00' for i in range(24)]
     dt_obj=[datetime.datetime.strptime(str(i),'%H:%M:%S') for i in df.iloc[:,0]]
     for i in dt_obj:
@@ -42,11 +43,11 @@ def data_converter(enter,exit):
         #print(df)
         #print(today_data)
     #df2=pd.DataFrame()
-    df.to_excel("./summary/people counting summary.xlsx")
+    df.to_excel(excel_name)
 
 #data_converter(15,2)
 
-def create_summary(enter,exit):
+def create_summary(enter,exit,excel_name):
     #data={'櫃位地點':cam_place,'People Enter':info[1][1],'People Exit':info[0][1],'Current People Inside':info2[0][1],'Date':datetime.datetime.now()}
     
     ex_time=[f'{i}:00:00' for i in range(24)]
@@ -71,7 +72,7 @@ def create_summary(enter,exit):
     #print(data)
     df=pd.DataFrame(data=data,index=ex_time,columns=[datetime.datetime.now().strftime('%Y-%m-%d')])
     df.index.name = 'Time'
-    df.to_excel("./summary/people counting summary.xlsx")
+    df.to_excel(excel_name)
 #create_summary(5,2)
 
 

@@ -5,7 +5,7 @@ from imutils.video import FPS
 #from imutils import resize
 from mylib.mailer import Mailer
 from mylib import config, thread
-from mylib.config import x1,y1,x2,y2,vertical_direction,enter_direction
+from mylib.config import x1,y1,x2,y2,vertical_direction,enter_direction,cam_place
 import time, schedule, csv
 import numpy as np
 import argparse, imutils
@@ -29,6 +29,8 @@ def run():
 		help="path to Caffe pre-trained model")
 	ap.add_argument("-i", "--input", type=str,
 		help="path to optional input video file")
+	ap.add_argument("-cam", "--camera", required=True,type=str,
+		help="summary camera name")
 	ap.add_argument("-o", "--output", type=str,
 		help="path to optional output video file")
 	# confidence default 0.4
@@ -580,7 +582,6 @@ def run():
 
 		# Initiate a simple log to save data at end of the day
 		if config.Log:
-
 			try:
 				timeinxmins
 			except NameError:
@@ -590,13 +591,14 @@ def run():
 				#data={'櫃位地點':config.cam_place,'People Enter':info[1][1],'People Exit':info[0][1],'Current People Inside':info2[0][1],'Date':datetime.datetime.now()}
 				#df=pd.DataFrame(data=data)
 				timeinxmins=datetime.datetime.now() + config.timedel
-				excel_name="./summary/people counting summary.xlsx"
+				cam_place=str(args["camera"])
+				excel_name=f"./summary/{cam_place} summary.xlsx"
 				if exists(excel_name):
 					#with pd.ExcelWriter(excel_name,mode='a')  as writer:
 					#append_df_to_excel(excel_name, df,header=None, index=False)
-					data_converter(info[1][1],info[0][1])  
+					data_converter(info[1][1],info[0][1],excel_name)  
 				else:
-					create_summary(info[1][1],info[0][1])
+					create_summary(info[1][1],info[0][1],excel_name)
 				print('summary exported!')
 				
 		# check to see if we should write the frame to disk
