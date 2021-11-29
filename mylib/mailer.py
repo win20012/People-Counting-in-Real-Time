@@ -4,7 +4,6 @@ class Mailer:
 
     """
     This script initiaties the email alert function.
-
     """
     def __init__(self):
         # Enter your email below. This email will be used to send alerts.
@@ -27,7 +26,10 @@ class Mailer:
         message = 'Subject: {}\n\n{}'.format(SUBJECT, TEXT)
 
         # sending the mail
-        self.server.sendmail(self.EMAIL, mail, message)
-        self.server.quit()
+        try:
+            self.server.sendmail(self.EMAIL, mail, message)
+            self.server.quit()
+        except: 
+            pass
 #mailobj=Mailer()
 #mailobj.send('winwongsawatdichart@gmail.com')

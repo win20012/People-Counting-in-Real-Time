@@ -16,7 +16,7 @@ sender_email_password='testsenderemailpassword'
 # e.g.,s 'email@gmail.com'
 MAIL = 'winwongsawatdichart@gmail.com'
 # Enter the ip camera url (e.g., url = 'http://191.138.0.100:8040/video')
-url = 'rtsp://admin:123456@192.168.1.110/onvif-media/media.amp?streamprofile=Profile1&audio=0'
+url = 'rtsp://192.168.1.103/onvif-media/media.amp?streamprofile=Profile1&audio=1'
 #
 #rtsp://admin:Hdit23059797@192.168.13.125:554/ISAPI/Streaming/channels/101
 # ON/OFF for mail feature. Enter True to turn on the email alert feature.
@@ -30,7 +30,7 @@ Thread = True
 # height and width of frame
 # start running the video first, it's height and width will be printed in the cmd then type it in here
 # hi = height and wi = width
-hi=500
+hi=281
 wi=500
 
 #specify points here the line will be draw from x1,y1 to x2,y2
