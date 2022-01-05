@@ -6,10 +6,13 @@ class ThreadingClass:
     self.cap = cv2.VideoCapture(name)
 	# define an empty queue and thread
     self.q = queue.Queue()
-    t = threading.Thread(target=self._reader)
-    t.daemon = True
-    t.start()
-
+    t1 = threading.Thread(target=self._reader)
+    #t2 = threading.Thread(target=self.thread_detector)
+    t1.daemon = True
+    #t2.daemon = True
+    t1.start()
+    #t2.start()
+    
   # read the frames as soon as they are available
   # this approach removes OpenCV's internal buffer and reduces the frame lag
   def _reader(self):
@@ -23,7 +26,6 @@ class ThreadingClass:
         except queue.Empty:
           pass
       self.q.put(frame) # --- store them in a queue (instead of the buffer)
-
   def read(self):
     return self.q.get() # fetch frames from the queue one by one
 

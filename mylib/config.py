@@ -16,8 +16,10 @@ sender_email_password='testsenderemailpassword'
 # e.g.,s 'email@gmail.com'
 MAIL = 'winwongsawatdichart@gmail.com'
 # Enter the ip camera url (e.g., url = 'http://191.138.0.100:8040/video')
-url = 'rtsp://192.168.1.103/onvif-media/media.amp?streamprofile=Profile1&audio=1'
-#
+url = './videos/example_01.mp4'
+# 0 for webcam testing
+#'./videos/example_01.mp4'
+#'rtsp://192.168.1.103/onvif-media/media.amp?streamprofile=Profile1&audio=1'
 #rtsp://admin:Hdit23059797@192.168.13.125:554/ISAPI/Streaming/channels/101
 # ON/OFF for mail feature. Enter True to turn on the email alert feature.
 ALERT = True

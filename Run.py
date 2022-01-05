@@ -4,7 +4,7 @@ from imutils.video import VideoStream
 from imutils.video import FPS
 #from imutils import resize
 from mylib.mailer import Mailer
-from mylib import config, thread
+from mylib import config,thread
 from mylib.config import x1,y1,x2,y2,vertical_direction,enter_direction,cam_place
 import time, schedule, csv
 import numpy as np
@@ -254,10 +254,6 @@ def run():
 		# draw a horizontal line in the center of the frame -- once an
 		# object crosses this line we will determine whether they were
 		# moving 'up' or 'down'
-		#cv2.line(frame, (0, H // 2), (W, H // 2), (0, 0, 0), 3)
-		#cv2.line(frame, (0,220), (W,120), (0, 0, 0), 3)
-		#cv2.line(frame, (0, int(round(H * 0.50))), (W, int(round(H * 0.66))), (0, 0, 0), 3)
-		#cv2.line(frame, (0, int(round(H * 0.80))), (W, int(round(H * 0.80))), (0, 0, 0), 3)
 		cv2.line(frame, (int(round(x1)), int(round(y1))), (int(round(x2)), int(round(y2))), (0, 0, 255), 3)
 		#iterlist=createLineIterator(np.array([0, round(H * 0.50)]),np.array([W, round(H * 0.66)]),frame)
 		#print(len(iterlist))
@@ -332,7 +328,7 @@ def run():
 							direction = -1
 						else:
 							direction = 0
-
+ 
 				# check to see if the object has been counted or not
 				if not to.counted:
 					if centroid[0] < iterlist[0][0] or centroid[0] > iterlist[-1][0]:
@@ -523,7 +519,7 @@ def run():
 			# store the trackable object in our dictionary
 			trackableObjects[objectID] = to
 			
-                                #print(peoplechangelist)
+			#print(peoplechangelist)
 			# draw both the ID of the object and the centroid of the
 			# object on the output frame
 			text = "ID {}".format(objectID)
@@ -624,7 +620,10 @@ def run():
 			num_seconds=(t1-t0)
 			if num_seconds > 28800:
 				break
-
+	if config.Scheduler:
+			if datetime.datetime.now() >= tmr :
+				print('renew program')
+				raise ValueError
 	# stop the timer and display FPS information
 	fps.stop()
 	print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
@@ -649,16 +648,33 @@ def run():
 
 ##learn more about different schedules here: https://pypi.org/project/schedule/
 if config.Scheduler:
-	##Runs for every 1 second
-	schedule.every(1).seconds.do(run)
-	##Runs at every day (9:00 am). You can change it.
-	#schedule.every().day.at("9:00").do(run)
+    ##Runs for every 1 second
+    schedule.every(1).seconds.do(run)
+    global tmr
+    
+    ##Runs at every day (9:00 am). You can change it.
+    #schedule.every().day.at("9:00").do(run)
+    while 1:
+        tmr=datetime.datetime.now()
+        try:
+            tmr=tmr.replace(day=tmr.day + 1, hour=0, minute=0, second=0, microsecond=0)
+            #tmr=tmr.replace(day=tmr.day, hour=tmr.hour, minute=tmr.minute + 1, second=0, microsecond=0)
+        except ValueError:
+            try:
+                tmr=tmr.replace(month=tmr.month + 1, day= 1,hour=0, minute=0, second=0, microsecond=0)
+            except ValueError:
+                tmr=tmr.replace(year= tmr.year + 1 ,month= 1, day= 1,hour=0, minute=0, second=0, microsecond=0)
+        print(tmr)
+        print(datetime.datetime.now())
+        try:
+            schedule.run_pending()
 
-	while 1:
-		try:
-			schedule.run_pending()
-		except:
-			pass
-
+            if datetime.datetime.now() >= tmr:
+                print('renew program')
+                raise ValueError
+                
+        except:
+            print('schedule error')
+            continue
 else:
-	run()
+    run()

@@ -1,7 +1,8 @@
 ################ first time set up ################################
 install python, cmake and anaconda first
+create conda env  "conda create --name people-counting"
 install packages with "pip install -r reqiurement.txt"
-then dlib by conda install -c conda-forge dlib
+then dlib by "conda install -c conda-forge dlib"
 ################ instructions #####################################
 most of the adjustable parameters are in config.py in mylib folder
 you can edit it by right click on the file and choose "Edit with IDLE" then choose "Edit with IDLE 3.9" or any type of IDLE
@@ -14,5 +15,6 @@ for words or strings ; 'this is an example' (need to write ' on the both isde of
 1. open cmd and type "cd C:\Users\H310M\Desktop\tracker1\People-Counting-in-Real-Time" for normal tracker 
 or "cd C:\Users\H310M\Desktop\rapid\RAPiD" for fish eye tracker. Note that the directory depends on the location of the tracker folder
 2. type "conda activate rapid"
-3. then type "python run.py --prototxt mobilenet_ssd/MobileNetSSD_deploy.prototxt --model mobilenet_ssd/MobileNetSSD_deploy.caffemodel -cam camera1" for normal tracker, the last argument (-cam) is the summary file name.
+3. then type "python run_thread.py -cam camera1" 
+for normal tracker, the last argument (-cam) is the summary file name.
 or "python tracker.py -cam camera1" for fish eye tracker, the last argument (-cam) is the summary file name.

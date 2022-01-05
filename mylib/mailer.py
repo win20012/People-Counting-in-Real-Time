@@ -19,17 +19,20 @@ class Mailer:
 
     def send(self, mail):
         self.server = smtplib.SMTP_SSL('smtp.gmail.com', self.PORT)
+        
         self.server.login(self.EMAIL, self.PASS)
+        
+            
         # message to be sent
         SUBJECT = 'ALERT!'
         TEXT = f'People limit exceeded in your building!'
         message = 'Subject: {}\n\n{}'.format(SUBJECT, TEXT)
 
         # sending the mail
-        try:
-            self.server.sendmail(self.EMAIL, mail, message)
-            self.server.quit()
-        except: 
-            pass
+        
+        self.server.sendmail(self.EMAIL, mail, message)
+        self.server.quit()
+        
+         
 #mailobj=Mailer()
 #mailobj.send('winwongsawatdichart@gmail.com')
