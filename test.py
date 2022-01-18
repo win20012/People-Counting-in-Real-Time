@@ -1,16 +1,8 @@
+def foo():
+        While True:
+            pass
+            if 
 
-def bigger():
-    try:
-        smaller()
-    except:
-        print('bigger except')
 
-def smaller():
-    try:
-        print('smaller executed')
-        raise ValueError
-    except:
-        print('smaller except')
-        raise ValueError
-
-bigger()
+schedule.every(1).seconds.do(foo)
+schedule.run_pending()

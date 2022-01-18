@@ -17,7 +17,7 @@ from get_requests import send_req
 from os.path import exists
 from excel_data_converter import create_summary, data_converter
 import queue
-#import threading
+import os,sys
 from multiprocessing import Queue, Process
 
 t0 = time.time()
@@ -650,9 +650,10 @@ def tracker_peo(q):
         if config.Scheduler:
                 if datetime.datetime.now() >= var.tmr :
                     print('renew program')
-                    raise ValueError
+                    os.execv(sys.executable, ['python'] + sys.argv)
     # stop the timer and display FPS information
     fps.stop()
+    
     print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
@@ -672,29 +673,65 @@ def tracker_peo(q):
     # close any open windows
     cv2.destroyAllWindows()
 
+# Custom Thread Class
+class MyThread():
+     
+  # Function that raises the custom exception
+    def __init__(self,q_arg):
+        self.q=q_arg
+    def run(self):
+       
+        # Variable that stores the exception, if raised by someFunction
+        self.exc = None           
+        try:
+            self.cam_process = Process(target=capture, args=(self.q,))
+            self.think_process = Process(target=tracker_peo, args=(self.q,))
+            self.cam_process.start()
+            self.think_process.start()
+        except IndexError as e:
+            self.exc = e
+       
+    def join(self):
+        self.cam_process.join()
+        self.think_process.join()
+        # Since join() returns in caller thread
+        # we re-raise the caught exception
+        # if any was caught
+        if self.exc:
+            raise self.exc
+    def terminate(self):
+        self.cam_process.terminate()
+        self.think_process.terminate()
+q= Queue()
+thread1= MyThread(q)
+
 def start_thread():
     q= Queue()
-    cam_process = Process(target=capture, args=(q,))
-    cam_process.start()
-    think_process = Process(target=tracker_peo, args=(q,))
-    think_process.start()
-    cam_process.join()
-    think_process.join()
+    thread=MyThread(q)
+    thread.run()
+    try:
+        thread.join()
+    except:
+        print('start thread error')
+        raise KeyboardInterrupt
+
+def stop_thread():
+    pass
 ##learn more about different schedules here: https://pypi.org/project/schedule/
 if __name__ == '__main__':
 
     q= Queue()
     if config.Scheduler:
         ##Runs for every 1 second
-        global tmr
-        tmr=datetime.datetime.now()
+        #global tmr
+        #tmr=datetime.datetime.now()
         schedule.every(1).seconds.do(start_thread)
         
         
         ##Runs at every day (9:00 am). You can change it.
         #schedule.every().day.at("9:00").do(run)
         while 1:
-            var.tmr=datetime.datetime.now()
+            #var.tmr=datetime.datetime.now()
             try:
                 #tmr=tmr.replace(day=tmr.day + 1, hour=21, minute=12, second=0, microsecond=0)
                 var.tmr=var.tmr.replace(day=var.tmr.day + 1, hour=0, minute=0, second=0, microsecond=0)
@@ -709,7 +746,7 @@ if __name__ == '__main__':
             schedule.run_pending()
 
             if datetime.datetime.now() >= var.tmr:
-                print('renew program')
+                print('renew outer program')
                 raise ValueError
                     
             #except:

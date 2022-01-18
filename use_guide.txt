@@ -1,7 +1,8 @@
 ################ first time set up ################################
 install python, cmake and anaconda first
 create conda env  "conda create --name people-counting"
-install packages with "pip install -r reqiurement.txt"
+activate the envioment with ""conda activate people-counting"
+install packages with "pip install -r requirements.txt"
 then dlib by "conda install -c conda-forge dlib"
 ################ instructions #####################################
 most of the adjustable parameters are in config.py in mylib folder
